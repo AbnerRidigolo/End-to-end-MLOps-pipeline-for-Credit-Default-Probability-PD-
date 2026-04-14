@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Segredos — NUNCA commite
+.env
+*.key
+*.pem
+secrets/
+
+# Dados (não versionamos dados brutos)
+data/raw/*.parquet
+data/raw/*.csv
+data/silver/
+data/gold/
+data/warehouse*.duckdb
+data/raw/metadata_*.json
+
+# MLflow local (use o servidor)
+mlruns/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/.user.yml
+dbt/logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Testes / Coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Docker volumes (gerenciados pelo Compose)
+postgres-db/
+minio-data/
+airflow-logs/

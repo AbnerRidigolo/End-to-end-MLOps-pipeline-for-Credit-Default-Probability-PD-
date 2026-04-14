@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: fato_contrato
+    description: >
+      Tabela fato principal da carteira de crédito. Enriquecida com segmentos
+      de risco, faixas de score/renda/DTI, valor em risco e perda esperada.
+      Fonte: stg_contratos | Granularidade: 1 linha por contrato.
+    columns:
+      - name: contrato_id
+        tests: [unique, not_null]
+      - name: inadimplente
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: segmento_risco
+        tests:
+          - accepted_values:
+              values: [low_risk, medium_risk, high_risk]
+      - name: dti
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 5
+
+  - name: atrasos
+    description: >
+      Análise de atrasos e roll-rates por safra. Calcula bucket de atraso
+      (Current, B1-B5), indicador de default regulatório (>90d), e
+      métricas agregadas por safra/produto/UF para BI.
+    columns:
+      - name: contrato_id
+        tests: [not_null]
+      - name: bucket_atraso
+        tests:
+          - accepted_values:
+              values:
+                - "Current"
+                - "Bucket 1 (1-30d)"
+                - "Bucket 2 (31-60d)"
+                - "Bucket 3 (61-90d)"
+                - "Bucket 4 (91-180d)"
+                - "Bucket 5 (>180d / Write-off)"
+      - name: em_default_regulatorio
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: features_risco
+    description: >
+      Feature Store para modelos de PD. Inclui features originais, engineered
+      (log, interações, flags, one-hot) e target. Input direto para train_model.py
+      e API de serving. NÃO inclui dados raw sensíveis (CPF, nome, etc.).
+    columns:
+      - name: contrato_id
+        tests: [unique, not_null]
+      - name: inadimplente
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: dti
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 5
+      - name: score_atraso_ponderado
+        description: "Score comportamental: 1x atraso30 + 2x atraso60 + 3x atraso90"

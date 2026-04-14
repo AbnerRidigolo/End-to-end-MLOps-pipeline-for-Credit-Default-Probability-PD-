@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: stg_contratos
+    description: >
+      Staging de contratos de crédito — dados Bronze limpos e tipados.
+      Fonte: data/raw/clientes_contratos.parquet
+      Remove duplicatas, valida ranges e recalcula features derivadas.
+    columns:
+      - name: contrato_id
+        description: "Identificador único do contrato"
+        tests:
+          - unique
+          - not_null
+
+      - name: cliente_id
+        description: "Identificador do cliente"
+        tests:
+          - not_null
+
+      - name: renda_mensal
+        description: "Renda mensal em R$ (mín: salário mínimo 2024)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1320
+              max_value: 500000
+
+      - name: score_interno
+        description: "Score de crédito interno (300-1000)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 300
+              max_value: 1000
+
+      - name: inadimplente
+        description: "Target: 1=inadimplente, 0=adimplente"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+      - name: dti
+        description: "Debt-to-Income ratio (saldo / renda anual)"
+
+      - name: utilizacao_limite
+        description: "Percentual de utilização do limite (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1.05  # leve tolerância
+
+      - name: produto
+        description: "Produto de crédito"
+        tests:
+          - accepted_values:
+              values:
+                - pessoal
+                - consignado
+                - cartao_credito
+                - financiamento_auto
+                - cheque_especial
+
+      - name: uf
+        description: "Estado brasileiro (UF)"
+        tests:
+          - accepted_values:
+              values:
+                - SP
+                - RJ
+                - MG
+                - RS
+                - PR
+                - SC
+                - BA
+                - GO
+                - PE
+                - CE
+                - DF
+                - ES
+                - PA
+                - MT
+                - MS
+                - AM

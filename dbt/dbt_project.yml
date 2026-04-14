@@ -1,0 +1,37 @@
+name: 'risco_credito'
+version: '1.8.0'
+config-version: 2
+
+# Adaptador DuckDB — leve, perfeito para demo local
+profile: 'risco_credito'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuração das camadas
+models:
+  risco_credito:
+    silver:
+      +materialized: view
+      +schema: silver
+      +tags: ["silver", "cleaned"]
+    gold:
+      +materialized: table
+      +schema: gold
+      +tags: ["gold", "analytics", "ml-ready"]
+
+# Variáveis globais
+vars:
+  data_lake_path: "/opt/airflow/data"
+  cutoff_atraso_default: 90  # dias — definição de inadimplência
+  min_renda_valida: 1320     # salário mínimo BR 2024
+  versao_modelo: "v1"

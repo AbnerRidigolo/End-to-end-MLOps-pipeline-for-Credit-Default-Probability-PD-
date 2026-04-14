@@ -1,0 +1,20 @@
+risco_credito:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /opt/airflow/data/warehouse.duckdb
+      threads: 4
+      # DuckDB pode ler Parquet diretamente — zero ETL overhead
+      extensions:
+        - httpfs
+        - parquet
+        - json
+
+    prod:
+      type: duckdb
+      path: /opt/airflow/data/warehouse_prod.duckdb
+      threads: 8
+      extensions:
+        - httpfs
+        - parquet
